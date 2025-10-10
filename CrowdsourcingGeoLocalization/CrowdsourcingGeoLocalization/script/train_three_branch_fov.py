@@ -5,7 +5,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 from cir_net_FOV import *
 from distance import *
-from OriNet_MSHKED.input_data_hk_polar_three import InputData
+from input_data import InputData
 #import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
