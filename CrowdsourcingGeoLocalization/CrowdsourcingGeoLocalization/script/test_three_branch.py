@@ -5,7 +5,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 from cir_net_FOV import *
 from distance import *
-from OriNet_MSHKED.input_data_hk_polar_three import InputData
+from OriNet_MSHKED.input_data_polar_three import InputData
 #import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
@@ -32,18 +32,18 @@ network_type = args.network_type
 
 start_epoch = args.start_epoch
 polar = args.polar
-mat_type = 'matdata_HK_full.mat'
+mat_type = 'metadata.mat'
 
 number_of_epoch = args.number_of_epoch
 
-data_type = 'MSHKED'
+data_type = 'MSGD'
 
 loss_type = 'l1'
 
 batch_size = 64
 is_training = False
 loss_weight = 5.0
-# number_of_epoch = 100
+# number_of_epoch = 300
 
 learning_rate_val = 5e-5
 keep_prob_val = 0.8
@@ -191,5 +191,6 @@ if __name__ == '__main__':
         top50_indices = np.argsort(dist_array, axis=1)[:, :10]
 
         indices_with_top50 = np.column_stack((np.arange(len(prediction)), top50_indices))
+
 
         np.savetxt('indices_with_top50_iaff_all12w.txt', indices_with_top50, fmt='%d')
