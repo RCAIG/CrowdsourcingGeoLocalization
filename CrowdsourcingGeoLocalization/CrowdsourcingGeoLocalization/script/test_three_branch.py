@@ -5,7 +5,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 from cir_net_FOV import *
 from distance import *
-from OriNet_CVACT.input_data_act_polar_three import InputData
+from input_data import InputData
 #import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
@@ -226,5 +226,6 @@ if __name__ == '__main__':
 
         # Save to text file
         np.savetxt('indices_with_top50_iaff_all12w.txt', indices_with_top50, fmt='%d')
+
 
 
