@@ -3,9 +3,9 @@ import os
 import cv2
 import numpy as np
 
-image1_folder = 'D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\polarmap_cvhk_all'
-image2_folder = 'D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\streetview_cvhk_all'
-save_folder = 'D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\polarmap_cvhk_all_caijian'
+image1_folder = 'D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\polarmap_all'
+image2_folder = 'D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\streetview_all'
+save_folder = 'D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\polarmap_all_caijian'
 
 
 image1_files = [os.path.splitext(f)[0].replace('_satView', '') for f in os.listdir(image1_folder) if f.endswith('_satView.png')]
@@ -49,3 +49,4 @@ for file_name in image1_files:
     save_path = os.path.join(save_folder, file_name + '_satView_wrapped.png')
 
     cv2.imwrite(save_path, wrapped_pano_image)
+
