@@ -8,7 +8,7 @@ import scipy.io as sio
 class InputData:
     # the path of your dataset
 
-    img_root = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\MSHKED/"
+    img_root = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\MSGD/"
 
     panoRows = 128
 
@@ -19,7 +19,7 @@ class InputData:
     def __init__(self, polar=1):
         self.polar = polar
 
-        self.allDataList = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\script\OriNet_MSHKED\matdata_HK_full.mat"
+        self.allDataList = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\script\OriNet_MSGD\cross.mat"
         print('InputData::__init__: load %s' % self.allDataList)
 
         self.__cur_allid = 0  # for training
@@ -34,13 +34,13 @@ class InputData:
         for i in range(0, len(anuData['panoIds'])):
             grd_id_ori = self.img_root + '_' + anuData['panoIds'][i] + '/' + anuData['panoIds'][i] + '_zoom_2.jpg'
 
-            grd_id_align = self.img_root + 'streetview_cvhk_all/' + anuData['panoIds'][i] + '_grdView_pano.png'
+            grd_id_align = self.img_root + 'streetview_all/' + anuData['panoIds'][i] + '_grdView_pano.png'
             grd_id_ori_sem = self.img_root + '_' + anuData['panoIds'][i] + '/' + anuData['panoIds'][
                 i] + '_zoom_2_sem.jpg'
             grd_id_align_sem = self.img_root + '_' + anuData['panoIds'][i] + '/' + anuData['panoIds'][
                 i] + '_zoom_2_aligned_sem.jpg'
 
-            polar_sat_id_ori = self.img_root + 'polarmap_cvhk_all_caijian/' + anuData['panoIds'][i] + '_satView_wrapped.png'
+            polar_sat_id_ori = self.img_root + 'polarmap_all_caijian/' + anuData['panoIds'][i] + '_satView_wrapped.png'
 
             sat_id_ori = self.img_root + 'satview_all/' + anuData['panoIds'][i] + '_satView.jpg'
             crd_id_ori = self.img_root + 'crdview_resize_all/' + anuData['panoIds'][i] + '_crdView.png'
@@ -302,4 +302,5 @@ class InputData:
 
 if __name__ == '__main__':
     input_data = InputData()
+
     _, batch_sat, batch_grd, batch_utm, _ = input_data.next_batch_scan(12)
