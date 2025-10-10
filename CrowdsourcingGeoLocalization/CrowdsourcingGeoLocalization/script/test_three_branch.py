@@ -5,7 +5,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 from cir_net_FOV import *
 from distance import *
-from OriNet_MSHKED.input_data_polar_three import InputData
+from OriNet_CVACT.input_data_act_polar_three import InputData
 #import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
@@ -36,14 +36,13 @@ mat_type = 'metadata.mat'
 
 number_of_epoch = args.number_of_epoch
 
-data_type = 'MSGD'
+data_type = ''
 
 loss_type = 'l1'
 
 batch_size = 64
 is_training = False
 loss_weight = 5.0
-# number_of_epoch = 300
 
 learning_rate_val = 5e-5
 keep_prob_val = 0.8
@@ -76,21 +75,63 @@ def block_matrix_multiplication(A, B, block_size=1024):
 
     return C
 
+
+def validate_with_utm_threshold(dist_array, utm_coords, threshold_meters=25.0, topK_list=[1, 5, 10]):
+    """
+    Calculate Recall@N metrics based on UTM coordinates and distance threshold
+    
+    Args:
+        dist_array: Distance matrix [N, N]
+        utm_coords: UTM coordinates [N, 2] (x, y)
+        threshold_meters: Distance threshold in meters
+        topK_list: List of top-K values to calculate, e.g. [1, 5, 10]
+    
+    Returns:
+        recall_scores: Recall scores for each top-K
+    """
+    N = dist_array.shape[0]
+    recall_scores = {}
+    
+    for topK in topK_list:
+        correct_count = 0
+        
+        for i in range(N):
+            # Get UTM coordinates for current query
+            query_utm = utm_coords[i]
+            
+            # Get top-K most similar candidates
+            top_k_indices = np.argsort(dist_array[i, :])[:topK]
+            
+            # Check if any of the top-K candidates are within threshold
+            is_correct = False
+            for candidate_idx in top_k_indices:
+                candidate_utm = utm_coords[candidate_idx]
+                # Calculate Euclidean distance in meters
+                distance = np.sqrt((query_utm[0] - candidate_utm[0])**2 + 
+                                 (query_utm[1] - candidate_utm[1])**2)
+                if distance <= threshold_meters:
+                    is_correct = True
+                    break
+            
+            if is_correct:
+                correct_count += 1
+        
+        recall_scores[f'R@{topK}'] = correct_count / N
+    
+    return recall_scores
+
 # -------------------------------------------------------- #
 
 if __name__ == '__main__':
     tf.reset_default_graph()
 
-    # import data
+    # Import data
     input_data = InputData(polar)
 
-    # define placeholders
-
+    # Define placeholders
     crd_x = tf.placeholder(tf.float32, [None, 128, 170, 3], name='crd_x')
     grd_x = tf.placeholder(tf.float32, [None, 128, 512, 3], name='grd_x')
-    sat_x = tf.placeholder(tf.float32, [None, 335, 335, 3], name='sat_x')
     polar_sat_x = tf.placeholder(tf.float32, [None, 128, 512, 3], name='polar_sat_x')
-
 
 
     utms_x = tf.placeholder(tf.float32, [None, None, 1], name='utms')
@@ -98,7 +139,7 @@ if __name__ == '__main__':
     keep_prob = tf.placeholder(tf.float32)
     learning_rate = tf.placeholder(tf.float32)
 
-    # build model
+    # Build model
     mul_matrix, crd_matrix, distance, pred_orien = ConvNext_conv_three_iaff(crd_x, polar_sat_x, grd_x, keep_prob, is_training)
 
     s_height, s_width, s_channel = mul_matrix.get_shape().as_list()[1:]
@@ -110,7 +151,7 @@ if __name__ == '__main__':
 
     global_vars = tf.global_variables()
 
-    # run model
+    # Run model
     print('run model...')
     config = tf.ConfigProto(log_device_placement=False, allow_soft_placement=True)
     config.gpu_options.allow_growth = True
@@ -120,11 +161,7 @@ if __name__ == '__main__':
 
         print('load model...')
 
-        # load_model_path = '../Model/polar_' + str(polar) + '/' + data_type + '/' + network_type \
-        #                   + '/train_crd_noise_' + str(train_crd_noise) + '/train_crd_FOV_' + str(train_crd_FOV) \
-        #                   + '/model.ckpt'
         load_model_path = '../Model/polar_' + str(polar) + '/' + data_type + '/' + network_type + mat_type +'/' + '213' + '/' + 'model.ckpt'
-
         saver.restore(sess, load_model_path)
 
         print("   Model loaded from: %s" % load_model_path)
@@ -147,28 +184,20 @@ if __name__ == '__main__':
 
             mul_global_matrix[val_i: val_i + mul_matrix_val.shape[0], :] = mul_matrix_val
             crd_global_matrix[val_i: val_i + crd_matrix_val.shape[0], :] = crd_matrix_val
-            #orientation_gth[val_i: val_i + crd_matrix_val.shape[0]] = batch_orien
             val_i += mul_matrix_val.shape[0]
 
         print('   compute accuracy')
         crd_descriptor = crd_global_matrix
         mul_descriptor = mul_global_matrix
 
-        descriptor_dir = '../Result/MSHKED/Descriptor/'
+        descriptor_dir = '../Result/CVACT/Descriptor/'
         if not os.path.exists(descriptor_dir):
             os.makedirs(descriptor_dir)
 
-        # file = descriptor_dir \
-        #        + 'train_crd_noise_' + str(train_crd_noise) + '_train_crd_FOV_' + str(train_crd_FOV) \
-        #        + 'test_crd_noise_' + str(test_crd_noise) + '_test_crd_FOV_' + str(test_crd_FOV) \
-        #        + '_' + network_type + '.mat'
-        # scio.savemat(file, {'grd_descriptor': grd_descriptor, 'sat_descriptor': sat_descriptor,
-        #                     'orientation_gth': orientation_gth})
 
         data_amount = crd_descriptor.shape[0]
         top1_percent = int(data_amount * 0.01)
 
-        #if test_crd_noise==0:
         mul_descriptor = np.reshape(mul_global_matrix[:, :, :g_width, :], [-1, g_height * g_width * g_channel])
         mul_descriptor = mul_descriptor / np.linalg.norm(mul_descriptor, axis=-1, keepdims=True)
 
@@ -180,17 +209,22 @@ if __name__ == '__main__':
 
         dist_array = 2 - 2 * block_matrix_multiplication(crd_descriptor, nt_mul)
 
-
-        gt_dist = dist_array.diagonal()
-        prediction = np.sum(dist_array < gt_dist.reshape(-1, 1), axis=-1)
-        loc_acc = np.sum(prediction.reshape(-1, 1) <= np.arange(10), axis=0) / data_amount
-
-        print(loc_acc)
-
+        # Get UTM coordinates for distance threshold-based evaluation
+        utm_coords = input_data.get_utm_coords()
+        
+        # Use new evaluation metrics
+        recall_scores = validate_with_utm_threshold(dist_array, utm_coords, threshold_meters=25.0, topK_list=[1, 5, 10])
+        
+        print('R@1 = %.1f%%, R@5 = %.1f%%, R@10 = %.1f%%' % 
+              (recall_scores['R@1'] * 100.0, recall_scores['R@5'] * 100.0, recall_scores['R@10'] * 100.0))
+        # Get top 50 most matching image indices for each image
         dist_array=dist_array.astype(np.int32)
-        top50_indices = np.argsort(dist_array, axis=1)[:, :10]
+        top50_indices = np.argsort(dist_array, axis=1)[:, :50]
 
-        indices_with_top50 = np.column_stack((np.arange(len(prediction)), top50_indices))
+        # Save to text file
+        indices_with_top50 = np.column_stack((np.arange(data_amount), top50_indices))
 
-
+        # Save to text file
         np.savetxt('indices_with_top50_iaff_all12w.txt', indices_with_top50, fmt='%d')
+
+
