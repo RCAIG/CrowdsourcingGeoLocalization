@@ -44,7 +44,7 @@ def sample_bilinear(signal, rx, ry):
     return (iy1 - ry)[...,na] * fx1 + (ry - iy0)[...,na] * fx2
 
 
-########################### Apply Polar Transform to Aerial Images in MSHKED Dataset #############################
+########################### Apply Polar Transform to Aerial Images in MSGD Dataset #############################
 #S = 1200
 # S = 335
 # height = 128
@@ -59,7 +59,7 @@ def sample_bilinear(signal, rx, ry):
 #
 #
 # input_dir = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\satview_all/"
-# output_dir = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\polarmap_cvhk_all/"
+# output_dir = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\polarmap_all/"
 #
 # if not os.path.exists(output_dir):
 #     os.makedirs(output_dir)
@@ -76,7 +76,7 @@ def sample_bilinear(signal, rx, ry):
 import cv2
 
 input_dir = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\streetview_angle/"
-output_dir = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\streetview_cvhk_angle/"
+output_dir = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\streetview_angle/"
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
