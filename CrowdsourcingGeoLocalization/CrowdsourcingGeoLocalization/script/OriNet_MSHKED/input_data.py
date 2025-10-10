@@ -1,14 +1,13 @@
 import cv2
 import random
 import numpy as np
-# load the yaw, pitch angles for the street-view images and yaw angles for the aerial view
 import scipy.io as sio
 
 
 class InputData:
     # the path of your dataset
 
-    img_root = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\MSHKED/"
+    img_root = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\MSGD/"
 
 
     panoRows = 128
@@ -21,7 +20,7 @@ class InputData:
         self.polar = polar
 
 
-        self.allDataList = './OriNet_MSHKED/matdata_HK_full.mat'
+        self.allDataList = './OriNet_MSGD/matdata.mat'
         print('InputData::__init__: load %s' % self.allDataList)
 
         self.__cur_allid = 0  # for training
@@ -36,13 +35,13 @@ class InputData:
         for i in range(0, len(anuData['panoIds'])):
             grd_id_ori = self.img_root + '_' + anuData['panoIds'][i] + '/' + anuData['panoIds'][i] + '_zoom_2.jpg'
 
-            grd_id_align = self.img_root + 'streetview_cvhk_all/' + anuData['panoIds'][i] + '_grdView_pano.png'
+            grd_id_align = self.img_root + 'streetview_all/' + anuData['panoIds'][i] + '_grdView_pano.png'
             grd_id_ori_sem = self.img_root + '_' + anuData['panoIds'][i] + '/' + anuData['panoIds'][
                 i] + '_zoom_2_sem.jpg'
             grd_id_align_sem = self.img_root + '_' + anuData['panoIds'][i] + '/' + anuData['panoIds'][
                 i] + '_zoom_2_aligned_sem.jpg'
 
-            polar_sat_id_ori = self.img_root + 'polarmap_cvhk_all_caijian/' + anuData['panoIds'][i] + '_satView_wrapped.png'
+            polar_sat_id_ori = self.img_root + 'polarmap_all_caijian/' + anuData['panoIds'][i] + '_satView_wrapped.png'
 
             sat_id_ori = self.img_root + 'satview_all/' + anuData['panoIds'][i] + '_satView.jpg'
             crd_id_ori = self.img_root + 'crdview_resize_all/' + anuData['panoIds'][i] + '_crdView.png'
@@ -54,7 +53,6 @@ class InputData:
         self.all_data_size = len(self.id_alllist)
         print('InputData::__init__: load', self.allDataList, ' data_size =', self.all_data_size)
 
-        # partion the images into cells
 
         self.utms_all = np.zeros([2, self.all_data_size], dtype=np.float32)
         for i in range(0, self.all_data_size):
@@ -282,15 +280,14 @@ class InputData:
     def get_dataset_size(self):
         return self.trainNum
 
-    #
     def get_test_dataset_size(self):
         return self.valNum
 
-    #
     def reset_scan(self):
         self.__cur_test_id = 0
 
 
 if __name__ == '__main__':
     input_data = InputData()
+
     _, batch_sat, batch_grd, batch_utm, _ = input_data.next_batch_scan(12)
