@@ -72,7 +72,7 @@ def sample_bilinear(signal, rx, ry):
 #     imsave(output_dir + img.replace('jpg','png'), image)
 
 
-############################ Prepare Street View Images in MSHKED to Accelerate Training Time #############################
+############################ Prepare Street View Images in MSGD to Accelerate Training Time #############################
 import cv2
 
 input_dir = "D:\CrowdsourcingGeoLocalization\CrowdsourcingGeoLocalization\Data\ANU_data_small\streetview_angle/"
